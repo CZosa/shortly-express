@@ -27,6 +27,7 @@ app.get('/create',
     res.render('index');
   });
 
+
 app.get('/links', 
   (req, res, next) => {
     models.Links.getAll()
@@ -77,29 +78,45 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
-app.post('/login', 
-  (req, res, next) => {
-    
-    models.Users.compare(req.body)
-      .then(() => {
-        res.redirect('/');
-      })
-      .error((error) => {
-        res.redirect('/login');
-      });
-  }); 
-      
-    
-//   if (!models.Users.compare(attempted, password, salt)) {
-//     res.redirect('/login'); 
-//   } else {
-//     return models.Users.post(username, password)
-//     .then(results => {
-//       return models.Users.post( username, password);
-//    });    
-//   } 
-// });
+app.get('/login', 
+  (req, res) => {
+    res.render('login');
+  });
 
+// console.log('this is newUser', newUser);
+app.post('/login', 
+  (req, res) => {
+    let username = req.body.username;
+    let password = req.body.password;
+    
+    models.Users.get({username})
+      .then((users) => {
+        console.log(username, password);
+        if (users === undefined) {
+          console.log(users); 
+          res.redirect('/login'); 
+        } else {
+          res.redirect('/');
+        }
+      })
+      .error(() => {
+        res.redirect('/login');
+      }); 
+    // console.log('this is models: ', allUser);
+    
+    
+    // models.Users.getAll()
+    //   .then(models.Users.compare((results) => { 
+    //     res.redirect('/');
+    //   })
+    //     .error((error) => {
+    //       // throw error;
+    //       res.redirect('/login');
+    //     })
+    //     .catch(() => {
+    //       res.redirect('/login');
+    //     }));
+  }); 
 
 app.post('/signup', 
   (req, res, next) => {
