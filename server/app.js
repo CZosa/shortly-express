@@ -78,48 +78,41 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+
+//getting the user from the table in the database
+// .then(models.Users.compare(results))
 app.get('/login', 
   (req, res) => {
     res.render('login');
   });
 
-// console.log('this is newUser', newUser);
-app.post('/login', 
-  (req, res) => {
-    let username = req.body.username;
-    let password = req.body.password;
-    
-    models.Users.get({username})
-      .then((users) => {
-        console.log(username, password);
-        if (users === undefined) {
-          console.log(users); 
-          res.redirect('/login'); 
-        } else {
-          res.redirect('/');
-        }
-      })
-      .error(() => {
-        res.redirect('/login');
-      }); 
-    // console.log('this is models: ', allUser);
-    
-    
-    // models.Users.getAll()
-    //   .then(models.Users.compare((results) => { 
-    //     res.redirect('/');
-    //   })
-    //     .error((error) => {
-    //       // throw error;
-    //       res.redirect('/login');
-    //     })
-    //     .catch(() => {
-    //       res.redirect('/login');
-    //     }));
-  }); 
+app.post('/login', (req, res, next) => {
+  
+  var username = {
+    username: req.body.username 
+  }; 
+  
+  models.Users.get(username)
+    .then(user=> {
+      if (user === undefined) { //after we serach the table, if the 
+        //suser isn't there, we redirect to the login page 
+        res.redirect('/login'); 
+        return; 
+      } //is this how we use compare? 
+      if (models.Users.compare(req.body.password, user.password, user.salt)) {
+        res.redirect('/');
+      } else {
+        res.redirect('/login'); 
+      }
+    })   
+    .catch(() => {
+      res.redirect('/login');
+      return;  
+    });  
+}); 
 
 app.post('/signup', 
-  (req, res, next) => {
+  (req, res) => {
     // const { username, password } = req.body; 
     models.Users.create(req.body)
       .then(() => {
